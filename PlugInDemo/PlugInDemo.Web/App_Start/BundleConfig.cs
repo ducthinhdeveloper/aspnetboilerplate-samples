@@ -36,6 +36,7 @@ namespace PlugInDemo.Web
                         "~/Scripts/bootstrap.min.js",
 
                         "~/Scripts/moment-with-locales.min.js",
+                        "~/Scripts/jquery.validate.min.js",
                         "~/Scripts/jquery.blockUI.js",
                         "~/Scripts/toastr.min.js",
                         "~/Scripts/sweetalert/sweet-alert.min.js",

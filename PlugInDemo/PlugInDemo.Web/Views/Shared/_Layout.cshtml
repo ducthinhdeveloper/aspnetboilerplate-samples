@@ -8,7 +8,9 @@
 
     See App/Main/views/layout/layout.cshtml for Angular application's layout page.
 *@
-
+@{
+    SetAntiForgeryCookie();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +53,7 @@
     @Html.IncludeScript("~/Scripts/jquery-ui-1.11.4.min.js")
     @Html.IncludeScript("~/Scripts/bootstrap.min.js")
 
+    @Html.IncludeScript("~/Scripts/jquery.validate.min.js")
     @Html.IncludeScript("~/Scripts/jquery.blockUI.js")
     @Html.IncludeScript("~/Scripts/toastr.min.js")
     @Html.IncludeScript("~/Scripts/others/spinjs/spin.js")

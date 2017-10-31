@@ -1,13 +1,15 @@
 using System.ComponentModel.DataAnnotations;
-using Abp.Application.Services.Dto;
-using PlugInDemo.Users;
+using Abp.Authorization.Users;
+using Abp.AutoMapper;
+using Abp.MultiTenancy;
 
 namespace PlugInDemo.MultiTenancy.Dto
 {
-    public class CreateTenantInput : IInputDto
+    [AutoMapTo(typeof(Tenant))]
+    public class CreateTenantInput
     {
         [Required]
-        [StringLength(Tenant.MaxTenancyNameLength)]
+        [StringLength(AbpTenantBase.MaxTenancyNameLength)]
         [RegularExpression(Tenant.TenancyNameRegex)]
         public string TenancyName { get; set; }
 
@@ -16,7 +18,10 @@ namespace PlugInDemo.MultiTenancy.Dto
         public string Name { get; set; }
 
         [Required]
-        [StringLength(User.MaxEmailAddressLength)]
+        [StringLength(AbpUserBase.MaxEmailAddressLength)]
         public string AdminEmailAddress { get; set; }
+
+        [MaxLength(AbpTenantBase.MaxConnectionStringLength)]
+        public string ConnectionString { get; set; }
     }
 }

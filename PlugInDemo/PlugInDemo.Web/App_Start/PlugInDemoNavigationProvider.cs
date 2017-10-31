@@ -32,6 +32,14 @@ namespace PlugInDemo.Web
                         )
                 ).AddItem(
                     new MenuItemDefinition(
+                        "Users",
+                        L("Users"),
+                        url: "#users",
+                        icon: "fa fa-users",
+                        requiredPermissionName: PermissionNames.Pages_Users
+                        )
+                ).AddItem(
+                    new MenuItemDefinition(
                         "About",
                         new LocalizableString("About", PlugInDemoConsts.LocalizationSourceName),
                         url: "#/about",

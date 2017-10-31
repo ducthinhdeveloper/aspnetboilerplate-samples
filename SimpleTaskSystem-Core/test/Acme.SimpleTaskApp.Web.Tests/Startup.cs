@@ -1,12 +1,14 @@
 ﻿using System;
 using Abp.AspNetCore;
-using Abp.AspNetCore.Mvc;
 using Abp.AspNetCore.TestBase;
 using Abp.Dependency;
+using Abp.Reflection.Extensions;
 using Acme.SimpleTaskApp.EntityFrameworkCore;
+using Acme.SimpleTaskApp.Web.Startup;
 using Castle.MicroKernel.Registration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,10 +21,8 @@ namespace Acme.SimpleTaskApp.Web.Tests
         {
             services.AddEntityFrameworkInMemoryDatabase();
 
-            services.AddMvc(options =>
-            {
-                options.AddAbp(services); //Add ABP infrastructure to MVC
-            });
+            services.AddMvc()
+                .PartManager.ApplicationParts.Add(new AssemblyPart(typeof(SimpleTaskAppWebModule).GetAssembly()));
 
             //Configure Abp and Dependency Injection
             return services.AddAbp<SimpleTaskAppWebTestModule>(options =>

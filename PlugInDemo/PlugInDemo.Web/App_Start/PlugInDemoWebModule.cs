@@ -18,7 +18,7 @@ namespace PlugInDemo.Web
         typeof(PlugInDemoApplicationModule),
         typeof(PlugInDemoWebApiModule),
         typeof(AbpWebSignalRModule),
-        typeof(AbpHangfireModule),
+        //typeof(AbpHangfireModule), - ENABLE TO USE HANGFIRE INSTEAD OF DEFAULT JOB MANAGER
         typeof(AbpWebMvcModule))]
     public class PlugInDemoWebModule : AbpModule
     {
@@ -30,11 +30,11 @@ namespace PlugInDemo.Web
             //Configure navigation/menu
             Configuration.Navigation.Providers.Add<PlugInDemoNavigationProvider>();
 
-            //Configure Hangfire
-            Configuration.BackgroundJobs.UseHangfire(configuration =>
-            {
-                configuration.GlobalConfiguration.UseSqlServerStorage("Default");
-            });
+            //Configure Hangfire - ENABLE TO USE HANGFIRE INSTEAD OF DEFAULT JOB MANAGER
+            //Configuration.BackgroundJobs.UseHangfire(configuration =>
+            //{
+            //    configuration.GlobalConfiguration.UseSqlServerStorage("Default");
+            //});
         }
 
         public override void Initialize()

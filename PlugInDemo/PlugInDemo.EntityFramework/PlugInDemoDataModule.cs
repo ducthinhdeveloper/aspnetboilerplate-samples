@@ -11,6 +11,8 @@ namespace PlugInDemo
     {
         public override void PreInitialize()
         {
+            Database.SetInitializer(new CreateDatabaseIfNotExists<PlugInDemoDbContext>());
+
             Configuration.DefaultNameOrConnectionString = "Default";
         }
 

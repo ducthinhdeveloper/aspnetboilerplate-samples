@@ -6,7 +6,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using Abp.Auditing;
 using Abp.Authorization.Users;
 using Abp.AutoMapper;
 using Abp.Configuration.Startup;
@@ -14,7 +13,8 @@ using Abp.Domain.Uow;
 using Abp.Extensions;
 using Abp.Threading;
 using Abp.UI;
-using Abp.Web.Mvc.Models;
+using Abp.Web.Models;
+using PlugInDemo.Authorization;
 using PlugInDemo.Authorization.Roles;
 using PlugInDemo.MultiTenancy;
 using PlugInDemo.Users;
@@ -33,6 +33,7 @@ namespace PlugInDemo.Web.Controllers
         private readonly RoleManager _roleManager;
         private readonly IUnitOfWorkManager _unitOfWorkManager;
         private readonly IMultiTenancyConfig _multiTenancyConfig;
+        private readonly LogInManager _logInManager;
 
         private IAuthenticationManager AuthenticationManager
         {
@@ -47,13 +48,15 @@ namespace PlugInDemo.Web.Controllers
             UserManager userManager,
             RoleManager roleManager,
             IUnitOfWorkManager unitOfWorkManager,
-            IMultiTenancyConfig multiTenancyConfig)
+            IMultiTenancyConfig multiTenancyConfig,
+            LogInManager logInManager)
         {
             _tenantManager = tenantManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _unitOfWorkManager = unitOfWorkManager;
             _multiTenancyConfig = multiTenancyConfig;
+            _logInManager = logInManager;
         }
 
         #region Login / Logout
@@ -74,7 +77,6 @@ namespace PlugInDemo.Web.Controllers
         }
 
         [HttpPost]
-        [DisableAuditing]
         public async Task<JsonResult> Login(LoginViewModel loginModel, string returnUrl = "", string returnUrlHash = "")
         {
             CheckModelState();
@@ -97,12 +99,12 @@ namespace PlugInDemo.Web.Controllers
                 returnUrl = returnUrl + returnUrlHash;
             }
 
-            return Json(new MvcAjaxResponse { TargetUrl = returnUrl });
+            return Json(new AjaxResponse { TargetUrl = returnUrl });
         }
 
-        private async Task<AbpUserManager<Tenant, Role, User>.AbpLoginResult> GetLoginResultAsync(string usernameOrEmailAddress, string password, string tenancyName)
+        private async Task<AbpLoginResult<Tenant, User>> GetLoginResultAsync(string usernameOrEmailAddress, string password, string tenancyName)
         {
-            var loginResult = await _userManager.LoginAsync(usernameOrEmailAddress, password, tenancyName);
+            var loginResult = await _logInManager.LoginAsync(usernameOrEmailAddress, password, tenancyName);
 
             switch (loginResult.Result)
             {
@@ -213,6 +215,7 @@ namespace PlugInDemo.Web.Controllers
                     {
                         new UserLogin
                         {
+                            TenantId = tenant.Id,
                             LoginProvider = externalLoginInfo.Login.LoginProvider,
                             ProviderKey = externalLoginInfo.Login.ProviderKey
                         }
@@ -243,8 +246,8 @@ namespace PlugInDemo.Web.Controllers
                 user.Password = new PasswordHasher().HashPassword(model.Password);
 
                 //Switch to the tenant
-                _unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant);
-                _unitOfWorkManager.Current.SetFilterParameter(AbpDataFilters.MayHaveTenant, AbpDataFilters.Parameters.TenantId, tenant.Id);
+                _unitOfWorkManager.Current.EnableFilter(AbpDataFilters.MayHaveTenant); //TODO: Needed?
+                _unitOfWorkManager.Current.SetTenantId(tenant.Id);
 
                 //Add default roles
                 user.Roles = new List<UserRole>();
@@ -260,10 +263,10 @@ namespace PlugInDemo.Web.Controllers
                 //Directly login if possible
                 if (user.IsActive)
                 {
-                    AbpUserManager<Tenant, Role, User>.AbpLoginResult loginResult;
+                    AbpLoginResult<Tenant, User> loginResult;
                     if (externalLoginInfo != null)
                     {
-                        loginResult = await _userManager.LoginAsync(externalLoginInfo.Login, tenant.TenancyName);
+                        loginResult = await _logInManager.LoginAsync(externalLoginInfo.Login, tenant.TenancyName);
                     }
                     else
                     {
@@ -347,7 +350,7 @@ namespace PlugInDemo.Web.Controllers
                 }
             }
 
-            var loginResult = await _userManager.LoginAsync(loginInfo.Login, tenancyName);
+            var loginResult = await _logInManager.LoginAsync(loginInfo.Login, tenancyName);
 
             switch (loginResult.Result)
             {

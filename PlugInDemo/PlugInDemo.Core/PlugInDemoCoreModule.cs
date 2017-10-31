@@ -6,6 +6,8 @@ using Abp.Zero;
 using Abp.Zero.Configuration;
 using PlugInDemo.Authorization;
 using PlugInDemo.Authorization.Roles;
+using PlugInDemo.MultiTenancy;
+using PlugInDemo.Users;
 
 namespace PlugInDemo
 {
@@ -14,6 +16,13 @@ namespace PlugInDemo
     {
         public override void PreInitialize()
         {
+            Configuration.Auditing.IsEnabledForAnonymousUsers = true;
+
+            //Declare entity types
+            Configuration.Modules.Zero().EntityTypes.Tenant = typeof(Tenant);
+            Configuration.Modules.Zero().EntityTypes.Role = typeof(Role);
+            Configuration.Modules.Zero().EntityTypes.User = typeof(User);
+
             //Remove the following line to disable multi-tenancy.
             Configuration.MultiTenancy.IsEnabled = true;
 

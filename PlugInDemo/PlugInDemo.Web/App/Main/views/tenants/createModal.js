@@ -7,14 +7,18 @@
             vm.tenant = {
                 tenancyName: '',
                 name: '',
-                adminEmailAddress: ''
+                adminEmailAddress: '',
+                connectionString: ''
             };
 
             vm.save = function () {
+                abp.ui.setBusy();
                 tenantService.createTenant(vm.tenant)
                     .success(function () {
                         abp.notify.info(App.localize('SavedSuccessfully'));
                         $modalInstance.close();
+                    }).finally(function () {
+                        abp.ui.clearBusy();
                     });
             };
 

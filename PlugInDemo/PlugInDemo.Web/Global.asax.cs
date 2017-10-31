@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Web;
+using Abp.Castle.Logging.Log4Net;
 using Abp.PlugIns;
 using Abp.Web;
 using Castle.Facilities.Logging;
@@ -10,16 +10,11 @@ namespace PlugInDemo.Web
     {
         protected override void Application_Start(object sender, EventArgs e)
         {
-            //Configure plugins
-            AbpBootstrapper
-                .PlugInSources
-                .AddFolder(HttpContext.Current.Server.MapPath("~/PlugIns"));
+            AbpBootstrapper.IocManager.IocContainer.AddFacility<LoggingFacility>(
+                f => f.UseAbpLog4Net().WithConfig("log4net.config")
+            );
 
-            //Configure logging
-            AbpBootstrapper.IocManager
-                .IocContainer
-                .AddFacility<LoggingFacility>(f => f.UseLog4Net()
-                .WithConfig("log4net.config"));
+            AbpBootstrapper.PlugInSources.AddFolder(Server.MapPath("/PlugIns"));
 
             base.Application_Start(sender, e);
         }
